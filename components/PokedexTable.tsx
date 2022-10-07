@@ -1,3 +1,4 @@
+import { forwardRef } from "@chakra-ui/react";
 import {
   Table,
   Thead,
@@ -8,7 +9,13 @@ import {
   TableCaption,
   TableContainer,
 } from "@chakra-ui/react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Pokemon } from "../types/Pokemon";
+
+const MotionTr = motion(
+  forwardRef((props, ref) => <Tr {...props} ref={ref} />)
+);
+MotionTr.displayName = "MotionTr";
 
 export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
   return (
@@ -24,16 +31,24 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {pokedex.map(({ id, name, type, image }) => (
-            <Tr key={id}>
-              <Td>{id}</Td>
-              <Td>
-                <img src={image.thumbnail} alt="Pokemon image" />
-              </Td>
-              <Td>{name.english}</Td>
-              <Td>{type.reduce((acc, cur) => `${acc}, ${cur}`)}</Td>
-            </Tr>
-          ))}
+          <AnimatePresence>
+            {pokedex.map(({ id, name, type, image }) => (
+              <MotionTr
+                key={id}
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Td>{id}</Td>
+                <Td>
+                  <img src={image.thumbnail} alt="Pokemon image" />
+                </Td>
+                <Td>{name.english}</Td>
+                <Td>{type.reduce((acc, cur) => `${acc}, ${cur}`)}</Td>
+              </MotionTr>
+            ))}
+          </AnimatePresence>
         </Tbody>
       </Table>
     </TableContainer>
