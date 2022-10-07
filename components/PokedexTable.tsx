@@ -19,7 +19,7 @@ const MotionTr = motion(
 MotionTr.displayName = "MotionTr";
 
 export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
-  const { push } = useRouter();
+  const { query, push } = useRouter();
 
   return (
     <TableContainer>
@@ -46,7 +46,15 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
                   filter: "brightness(1.5)",
                 }}
                 style={{ cursor: "pointer" }}
-                onClick={() => push(`/${id}`)}
+                onClick={() =>
+                  push({
+                    pathname: `/${id}`,
+                    query: {
+                      ...(query.name ? { name: query.name } : {}),
+                      ...(query.type ? { type: query.type } : {}),
+                    },
+                  })
+                }
               >
                 <Td>{id}</Td>
                 <Td>

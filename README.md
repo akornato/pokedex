@@ -2,8 +2,9 @@ The Pokedex app has a root page to view the Pokemons, and a details page.
 
 The state for name & type filters at the root page is kept in url query params so that
 
-- the page is server side rendered efficiently with only the pokemons requested
-- filter changes on the client trigger Next.js client-side page transitions which automatically send an API request to the server to update Pokemon data, see [when does getServerSideProps run](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#when-does-getserversideprops-run)
+- the filters are retained when returning from the details page
+- the root page is server side rendered efficiently with Pokemon data filtered as per the url
+- filter changes on the client trigger Next.js client-side page transitions which automatically send an API request to the server to update Pokemon data (see [when does getServerSideProps run](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#when-does-getserversideprops-run))
 
 Deployed at https://pokedex-three-pink.vercel.app
 

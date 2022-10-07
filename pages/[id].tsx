@@ -30,7 +30,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 };
 
 const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
-  const { push } = useRouter();
+  const { query, push } = useRouter();
   const [buttonLoading, setButtonLoading] = useState(false);
   const { name, description, image, base } = pokemon;
 
@@ -45,7 +45,13 @@ const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
         leftIcon={<ArrowBackIcon />}
         onClick={() => {
           setButtonLoading(true);
-          push("/");
+          push({
+            pathname: "/",
+            query: {
+              ...(query.name ? { name: query.name } : {}),
+              ...(query.type ? { type: query.type } : {}),
+            },
+          });
         }}
         isLoading={buttonLoading}
       >
