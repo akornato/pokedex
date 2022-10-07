@@ -55,7 +55,7 @@ const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
         }}
         isLoading={buttonLoading}
       >
-        Pokadex
+        Pokedex
       </Button>
       <Box mt={4}>
         <img src={image.hires} alt="Pokemon image" />
