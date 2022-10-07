@@ -7,7 +7,7 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Pokemon[]>
 ) {
-  const { name, type } = JSON.parse(req.body);
+  const { name, type } = JSON.parse(req.body || "{}");
   const pokemons = pokedex.filter(
     ({ name: nameLookup, type: typeList }) =>
       (!name ||
