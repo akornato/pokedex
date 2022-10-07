@@ -1,4 +1,11 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+The Pokedex app has a root page to view the Pokemons, and a details page.
+
+The state for name & type filters at the root page is kept in url query params so that
+
+- the page is server side rendered efficiently with only the pokemons requested
+- filter changes on the client trigger Next.js client-side page transitions which automatically send an API request to the server to update Pokemon data, see [when does getServerSideProps run](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#when-does-getserversideprops-run)
+
+Deployed at https://pokedex-three-pink.vercel.app
 
 ## Getting Started
 
@@ -12,9 +19,7 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/list](http://localhost:3000/api/list) and [http://localhost:3000/api/get/1](http://localhost:3000/api/get/1).
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
