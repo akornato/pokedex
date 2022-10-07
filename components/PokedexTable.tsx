@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { forwardRef } from "@chakra-ui/react";
 import {
   Table,
@@ -18,6 +19,8 @@ const MotionTr = motion(
 MotionTr.displayName = "MotionTr";
 
 export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
+  const { push } = useRouter();
+
   return (
     <TableContainer>
       <Table variant="simple">
@@ -39,6 +42,11 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                whileHover={{
+                  filter: "brightness(1.5)",
+                }}
+                style={{ cursor: "pointer" }}
+                onClick={() => push(`/${id}`)}
               >
                 <Td>{id}</Td>
                 <Td>
