@@ -11,9 +11,7 @@ export default function handler(
   const pokemons = pokedex.filter(
     ({ name: nameLookup, type: typeList }) =>
       (!name ||
-        Object.values(nameLookup).some((value) =>
-          value.toLowerCase().includes(name.toLowerCase())
-        )) &&
+        nameLookup.english.toLowerCase().includes(name.toLowerCase())) &&
       (!type ||
         typeList.some((value) =>
           value.toLowerCase().includes(type.toLowerCase())
