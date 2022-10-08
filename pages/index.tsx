@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { omitBy, debounce } from "lodash";
 import { PokedexTable } from "../components/PokedexTable";
-import { host } from "../constants/host";
+import { host } from "../shared/host";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokemon } from "../types/Pokemon";
 

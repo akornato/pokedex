@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { forwardRef } from "@chakra-ui/react";
 import {
@@ -11,6 +12,7 @@ import {
   TableContainer,
 } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { base64Shimmer } from "../shared/shimmer";
 import type { Pokemon } from "../types/Pokemon";
 
 const MotionTr = motion(
@@ -58,7 +60,17 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
               >
                 <Td>{id}</Td>
                 <Td>
-                  <img src={image.thumbnail} alt="Pokemon image" />
+                  <Image
+                    width={100}
+                    height={100}
+                    src={image.thumbnail}
+                    alt="Pokemon image"
+                    placeholder="blur"
+                    blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(
+                      100,
+                      100
+                    )}`}
+                  />
                 </Td>
                 <Td>{name.english}</Td>
                 <Td>{type.reduce((acc, cur) => `${acc}, ${cur}`)}</Td>

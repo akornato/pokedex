@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { forwardRef } from "@chakra-ui/react";
 import {
@@ -11,8 +12,9 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import { host } from "../constants/host";
 import { motion } from "framer-motion";
+import { base64Shimmer } from "../shared/shimmer";
+import { host } from "../shared/host";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokemon } from "../types/Pokemon";
 
@@ -58,7 +60,14 @@ const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
         Pokedex
       </Button>
       <Box mt={4}>
-        <img src={image.hires} alt="Pokemon image" />
+        <Image
+          width={400}
+          height={400}
+          src={image.hires || ""}
+          alt="Pokemon image"
+          placeholder="blur"
+          blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(400, 400)}`}
+        />
       </Box>
       <Text fontSize="5xl">{name.english}</Text>
       <Text fontSize="lg">{description}</Text>
