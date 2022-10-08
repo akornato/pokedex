@@ -23,9 +23,16 @@ const MotionBox = motion(
 );
 MotionBox.displayName = "MotionBox";
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const res = await fetch(`${host}/api/get/${query.id}`);
-  const pokemon = await res.json();
+export const getServerSideProps: GetServerSideProps = async ({
+  query,
+  res,
+}) => {
+  const pokemon = await fetch(`${host}/api/get/${query.id}`).then((res) =>
+    res.json()
+  );
+
+  res.setHeader("Cache-Control", "public, s-maxage=3600");
+
   return {
     props: { pokemon },
   };

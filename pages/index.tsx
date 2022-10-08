@@ -13,15 +13,20 @@ import { host } from "../shared/host";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokemon } from "../types/Pokemon";
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const res = await fetch(`${host}/api/list`, {
+export const getServerSideProps: GetServerSideProps = async ({
+  query,
+  res,
+}) => {
+  const pokedex = await fetch(`${host}/api/list`, {
     method: "POST",
     body: JSON.stringify({
       name: query?.name?.toString() || "",
       type: query?.type?.toString() || "",
     }),
-  });
-  const pokedex = await res.json();
+  }).then((res) => res.json());
+
+  res.setHeader("Cache-Control", "public, s-maxage=3600");
+
   return {
     props: { pokedex },
   };
