@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { Waypoint } from "react-waypoint";
 import { forwardRef } from "@chakra-ui/react";
 import {
   Table,
@@ -20,8 +22,18 @@ const MotionTr = motion(
 );
 MotionTr.displayName = "MotionTr";
 
+const itemsPerPage = 10;
+
 export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
   const { query, push } = useRouter();
+  const [page, setPage] = useState({ count: 1, scrollY: 0 });
+  const filteredPokedex = pokedex.filter(
+    (_, i) => i < page.count * itemsPerPage
+  );
+
+  useEffect(() => {
+    window.scrollTo(0, page.scrollY);
+  }, [page]);
 
   return (
     <TableContainer>
@@ -37,7 +49,7 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
         </Thead>
         <Tbody>
           <AnimatePresence>
-            {pokedex.map(({ id, name, type, image }) => (
+            {filteredPokedex.map(({ id, name, type, image }) => (
               <MotionTr
                 key={id}
                 layout
@@ -79,6 +91,15 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
           </AnimatePresence>
         </Tbody>
       </Table>
+      <Waypoint
+        bottomOffset="-100%"
+        onEnter={() =>
+          setPage((page) => ({
+            count: page.count + 1,
+            scrollY: window.scrollY,
+          }))
+        }
+      ></Waypoint>
     </TableContainer>
   );
 };
