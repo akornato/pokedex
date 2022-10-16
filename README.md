@@ -6,7 +6,7 @@ The state for name & type filters at the root page is kept in url query params s
 - the root page is server side rendered efficiently with Pokemon data filtered as per the url
 - filter changes on the client trigger Next.js client-side page transitions which send a request to the server to update Pokemon data (see [when does getServerSideProps run](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#when-does-getserversideprops-run)). The requests are cached client side for an hour.
 
-Deployed at https://pokedex-three-pink.vercel.app
+Deployed at https://pokemon-nft-web.vercel.app
 
 ## Getting Started
 
