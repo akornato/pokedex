@@ -1,22 +1,16 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import { pokemonContract } from "web/shared/contract";
 import type { NextApiRequest, NextApiResponse } from "next";
-import pokedata from "../../../data/pokemon.json";
-export type Pokemon = typeof pokedata[number];
 
-const pokemonLookup: { [id: number]: Pokemon } = pokedata.reduce(
-  (pokemonLookup, pokemon) => ({
-    ...pokemonLookup,
-    [pokemon.id]: pokemon,
-  }),
-  {}
-);
-
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Pokemon>
+  res: NextApiResponse
 ) {
   try {
-    const pokemon = pokemonLookup[parseInt(req.query.id?.toString() || "")];
+    const tokenId = parseInt(req.query.id?.toString() || "");
+    const cid = await pokemonContract.tokenURI(tokenId);
+    const pokemon = await fetch(
+      `https://pokemon-nft.infura-ipfs.io/ipfs/${cid}`
+    ).then((res) => res.json());
     if (pokemon) {
       res.status(200).json(pokemon);
       return;

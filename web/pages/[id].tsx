@@ -41,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
   const { query, push } = useRouter();
   const [buttonLoading, setButtonLoading] = useState(false);
-  const { name, description, image, base } = pokemon;
+  const { name, description, image, attributes } = pokemon;
 
   return (
     <MotionBox
@@ -70,18 +70,18 @@ const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
         <Image
           width={400}
           height={400}
-          src={image.hires || ""}
+          src={`https://pokemon-nft.infura-ipfs.io/ipfs/${image}`}
           alt="Pokemon image"
           placeholder="blur"
           blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(400, 400)}`}
         />
       </Box>
-      <Text fontSize="5xl">{name.english}</Text>
+      <Text fontSize="5xl">{name}</Text>
       <Text fontSize="lg">{description}</Text>
       <StatGroup mt={8}>
-        {Object.entries(base || {}).map(([key, value]) => (
-          <Stat key={key}>
-            <StatLabel>{key}</StatLabel>
+        {attributes.map(({ trait_type, value }) => (
+          <Stat key={trait_type}>
+            <StatLabel>{trait_type}</StatLabel>
             <StatNumber>{value}</StatNumber>
           </Stat>
         ))}

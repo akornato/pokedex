@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base64Shimmer } from "../shared/shimmer";
-import type { Pokemon } from "../types/Pokemon";
+import type { Pokedex } from "../types/Pokemon";
 
 const MotionTr = motion(
   forwardRef((props, ref) => <Tr {...props} ref={ref} />)
@@ -24,7 +24,7 @@ MotionTr.displayName = "MotionTr";
 
 const itemsPerPage = 10;
 
-export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
+export const PokedexTable: React.FC<{ pokedex: Pokedex }> = ({ pokedex }) => {
   const { query, push } = useRouter();
   const [page, setPage] = useState({ count: 1, scrollY: 0 });
   const filteredPokedex = pokedex.filter(
@@ -49,9 +49,9 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
         </Thead>
         <Tbody>
           <AnimatePresence>
-            {filteredPokedex.map(({ id, name, type, image }) => (
+            {filteredPokedex.map(({ tokenId, name, types, cidThumbnail }) => (
               <MotionTr
-                key={id}
+                key={tokenId}
                 layout
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -62,7 +62,7 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
                 style={{ cursor: "pointer" }}
                 onClick={() =>
                   push({
-                    pathname: `/${id}`,
+                    pathname: `/${tokenId}`,
                     query: {
                       ...(query.name ? { name: query.name } : {}),
                       ...(query.type ? { type: query.type } : {}),
@@ -70,12 +70,12 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
                   })
                 }
               >
-                <Td>{id}</Td>
+                <Td>{tokenId}</Td>
                 <Td>
                   <Image
                     width={100}
                     height={100}
-                    src={image.thumbnail}
+                    src={`https://pokemon-nft.infura-ipfs.io/ipfs/${cidThumbnail}`}
                     alt="Pokemon image"
                     placeholder="blur"
                     blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(
@@ -84,8 +84,8 @@ export const PokedexTable: React.FC<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
                     )}`}
                   />
                 </Td>
-                <Td>{name.english}</Td>
-                <Td>{type.reduce((acc, cur) => `${acc}, ${cur}`)}</Td>
+                <Td>{name}</Td>
+                <Td>{types}</Td>
               </MotionTr>
             ))}
           </AnimatePresence>

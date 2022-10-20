@@ -1,21 +1,38 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import { pokemonContract } from "web/shared/contract";
 import type { NextApiRequest, NextApiResponse } from "next";
-import pokedex from "../../data/pokemon.json";
-export type Pokemon = typeof pokedex[number];
+import type { Pokedex } from "web/types/Pokemon";
 
-export default function handler(
+const pokedexPromise = pokemonContract
+  .queryFilter(pokemonContract.filters.Minted())
+  .then((mintedEvents) =>
+    mintedEvents.reduce(
+      (acc, cur) => [
+        ...acc,
+        {
+          tokenId: cur.args[0].toString(),
+          name: cur.args[1],
+          types: cur.args[2],
+          cidThumbnail: cur.args[3],
+        },
+      ],
+      [] as Pokedex
+    )
+  );
+
+export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Pokemon[]>
+  res: NextApiResponse<Pokedex>
 ) {
-  const { name, type } = JSON.parse(req.body || "{}");
+  const pokedex = await pokedexPromise;
+  const { name: nameQueryArg, type: typeQueryArg } = JSON.parse(
+    req.body || "{}"
+  );
   const pokemons = pokedex.filter(
-    ({ name: nameLookup, type: typeList }) =>
-      (!name ||
-        nameLookup.english.toLowerCase().includes(name.toLowerCase())) &&
-      (!type ||
-        typeList.some((value) =>
-          value.toLowerCase().includes(type.toLowerCase())
-        ))
+    ({ name, types }) =>
+      (!nameQueryArg ||
+        name.toLowerCase().includes(nameQueryArg.toLowerCase())) &&
+      (!typeQueryArg ||
+        types.toLowerCase().includes(typeQueryArg.toLowerCase()))
   );
   res.status(200).json(pokemons);
 }

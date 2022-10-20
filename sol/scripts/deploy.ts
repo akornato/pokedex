@@ -1,22 +1,29 @@
 import { ethers } from "hardhat";
+import { Pokemon } from "../typechain-types";
+import mintFeed from "scripts/data/mint-feed.json";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const PokemonContractFactory = await ethers.getContractFactory("Pokemon");
+  const pokemonContract: Pokemon = await PokemonContractFactory.deploy();
+  await pokemonContract.deployed();
+  console.log(`Pokemon contract deployed to ${pokemonContract.address}`);
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const [owner] = await ethers.getSigners();
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  for (const pokemon of mintFeed.filter((_, index) => index >= 107)) {
+    await pokemonContract.safeMint(
+      owner.address,
+      pokemon.cid,
+      pokemon.tokenId,
+      pokemon.name,
+      pokemon.types,
+      pokemon.cidThumbnail,
+      { gasLimit: 300000 }
+    );
+    console.log(`Pokemon tokenId ${pokemon.tokenId} minted`);
+  }
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

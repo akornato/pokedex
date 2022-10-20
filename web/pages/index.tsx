@@ -11,7 +11,7 @@ import { omitBy, debounce } from "lodash";
 import { PokedexTable } from "../components/PokedexTable";
 import { host } from "../shared/host";
 import type { NextPage, GetServerSideProps } from "next";
-import type { Pokemon } from "../types/Pokemon";
+import type { Pokedex } from "../types/Pokemon";
 
 export const getServerSideProps: GetServerSideProps = async ({
   query,
@@ -32,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   };
 };
 
-const Home: NextPage<{ pokedex: Pokemon[] }> = ({ pokedex }) => {
+const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
   const { query, push } = useRouter();
 
   const onChange = useMemo(
