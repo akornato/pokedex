@@ -2,15 +2,19 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Pokemon is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
+contract Pokemon is ERC721, ERC721URIStorage, Ownable {
     /**
      * @dev Emitted when `tokenId` is minted
      */
-    event Minted(uint256 tokenId, string name, string types, string thumbnailUri);
+    event Minted(
+        uint256 tokenId,
+        string name,
+        string types,
+        string thumbnailUri
+    );
 
     constructor() ERC721("Pokemon", "PKM") {}
 
@@ -29,14 +33,6 @@ contract Pokemon is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
 
     // The following functions are overrides required by Solidity.
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override(ERC721, ERC721Enumerable) {
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
-
     function _burn(uint256 tokenId)
         internal
         override(ERC721, ERC721URIStorage)
@@ -51,14 +47,5 @@ contract Pokemon is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         returns (string memory)
     {
         return super.tokenURI(tokenId);
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
     }
 }
