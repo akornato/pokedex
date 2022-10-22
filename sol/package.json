@@ -7,7 +7,7 @@
     "sol:test": "hardhat test",
     "sol:deploy": "hardhat run --network localhost ./scripts/deploy.ts",
     "sol:deploy:mumbai": "hardhat run --network mumbai scripts/deploy.ts",
-    "sol:verify": "hardhat verify"
+    "sol:verify": "hardhat verify --network mumbai"
   },
   "dependencies": {
     "@ethersproject/abi": "^5.7.0",
