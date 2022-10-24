@@ -1,6 +1,6 @@
-## ERC721 Pokemon NFT
+## ERC721 Pokedex
 
-This demonstrates how to turn an array of Pokemon [data](https://github.com/Purukitto/pokemon-data.json) into an ERC721 NFT collection whose IFPS metadata conforms to [OpenSea](https://docs.opensea.io/docs/metadata-standards) standard, and then build a web app around it.
+This demonstrates how to turn a [Pokedex](https://github.com/Purukitto/pokemon-data.json) into an ERC721 NFT collection whose IFPS metadata conforms to [OpenSea](https://docs.opensea.io/docs/metadata-standards) standard, and then build a web app around it.
 
 Deployed at https://pokemon-nft-web.vercel.app and [Polygon Mumbai](https://mumbai.polygonscan.com/address/0x22448d0D2a0685c713e568272de1aFc7F8BEE644).
 
