@@ -25,8 +25,6 @@ export const getServerSideProps: GetServerSideProps = async ({
     }),
   }).then((res) => res.json());
 
-  res.setHeader("Cache-Control", "public, s-maxage=3600");
-
   return {
     props: { pokedex },
   };

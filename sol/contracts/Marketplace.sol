@@ -95,7 +95,7 @@ contract Marketplace {
             tokenId,
             listedItem.price
         );
-        
+
         payable(listedItem.seller).transfer(listedItem.price - royaltyAmount);
         payable(royaltyReceiver).transfer(royaltyAmount);
 
@@ -116,6 +116,7 @@ contract Marketplace {
     function getListing(address NFTAddress, uint256 tokenId)
         external
         view
+        isListed(NFTAddress, tokenId)
         returns (Listing memory)
     {
         return listings[NFTAddress][tokenId];

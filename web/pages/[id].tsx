@@ -12,6 +12,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
+import { ethers } from "ethers";
 import { motion } from "framer-motion";
 import { base64Shimmer } from "../shared/shimmer";
 import { host } from "../shared/host";
@@ -27,18 +28,19 @@ export const getServerSideProps: GetServerSideProps = async ({
   query,
   res,
 }) => {
-  const pokemon = await fetch(`${host}/api/get/${query.id}`).then((res) =>
+  const response = await fetch(`${host}/api/get/${query.id}`).then((res) =>
     res.json()
   );
 
-  res.setHeader("Cache-Control", "public, s-maxage=3600");
-
   return {
-    props: { pokemon },
+    props: response,
   };
 };
 
-const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
+const PokemonDetails: NextPage<{
+  pokemon: Pokemon;
+  listing?: { price: string; seller: string };
+}> = ({ pokemon, listing }) => {
   const { query, push } = useRouter();
   const [buttonLoading, setButtonLoading] = useState(false);
   const { name, description, image, attributes } = pokemon;
@@ -77,7 +79,17 @@ const PokemonDetails: NextPage<{ pokemon: Pokemon }> = ({ pokemon }) => {
         />
       </Box>
       <Text fontSize="5xl">{name}</Text>
-      <Text fontSize="lg">{description}</Text>
+      {listing && (
+        <Stat mt={4}>
+          <StatLabel>Listed price</StatLabel>
+          <StatNumber>
+            {ethers.utils.formatEther(listing.price).toString()} MATIC
+          </StatNumber>
+        </Stat>
+      )}
+      <Text mt={4} fontSize="lg">
+        {description}
+      </Text>
       <StatGroup mt={8}>
         {attributes.map(({ trait_type, value }) => (
           <Stat key={trait_type}>
