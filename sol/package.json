@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "sol:node": "hardhat node",
+    "sol:clean": "hardhat clean",
     "sol:compile": "hardhat compile",
     "sol:test": "hardhat test",
     "sol:deploy": "hardhat run --network localhost ./scripts/deploy.ts",

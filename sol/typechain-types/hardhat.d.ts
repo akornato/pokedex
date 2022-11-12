@@ -13,13 +13,21 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
-      name: "Ownable",
+      name: "IERC2981",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Ownable__factory>;
+    ): Promise<Contracts.IERC2981__factory>;
+    getContractFactory(
+      name: "ERC2981",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC2981__factory>;
     getContractFactory(
       name: "ERC721",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC721__factory>;
+    getContractFactory(
+      name: "ERC721Royalty",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721Royalty__factory>;
     getContractFactory(
       name: "ERC721URIStorage",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -45,20 +53,34 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
+      name: "Marketplace",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Marketplace__factory>;
+    getContractFactory(
       name: "Pokemon",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Pokemon__factory>;
 
     getContractAt(
-      name: "Ownable",
+      name: "IERC2981",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Ownable>;
+    ): Promise<Contracts.IERC2981>;
+    getContractAt(
+      name: "ERC2981",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC2981>;
     getContractAt(
       name: "ERC721",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ERC721>;
+    getContractAt(
+      name: "ERC721Royalty",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721Royalty>;
     getContractAt(
       name: "ERC721URIStorage",
       address: string,
@@ -89,6 +111,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
+    getContractAt(
+      name: "Marketplace",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Marketplace>;
     getContractAt(
       name: "Pokemon",
       address: string,

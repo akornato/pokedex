@@ -1,6 +1,6 @@
-## ERC721 Pokedex
+## ERC721/ERC2981 Pokedex royalty marketplace
 
-This demonstrates how to turn a [Pokedex](https://github.com/Purukitto/pokemon-data.json) into an ERC721 NFT collection whose IFPS metadata conforms to [OpenSea](https://docs.opensea.io/docs/metadata-standards) standard, and then build a web app around it.
+[Pokedex](https://github.com/Purukitto/pokemon-data.json) pokemons are turned into an ERC721 NFT collection extended with ERC2981 NFT Royalty Standard and metadata on IFPS, then listed on a Marketplace which implements royalty transfers on the NFT trades.
 
 Deployed at https://pokemon-nft-web.vercel.app and [Polygon Mumbai](https://mumbai.polygonscan.com/address/0x22448d0D2a0685c713e568272de1aFc7F8BEE644).
 
@@ -22,5 +22,5 @@ The state for name & type filters at the root page is kept in url query params s
 
 - `yarn scripts:mint-feed` uploads images and metadata to IPFS, and turns `pokedex.json` into a `mint-feed.json` with the fields ready to be consumed by `yarn sol:deploy`
 - `yarn sol:node` starts Hardhat Network
-- `yarn sol:deploy` deploys Pokemon ERC721 contract and mints all the Pokemon NFTs using the `mint-feed.json`
+- `yarn sol:deploy` deploys Pokemon and Marketplace contracts, mints all the Pokemon NFTs from `mint-feed.json`, and lists them on the marketplace
 - `yarn web:dev` starts the web app at [http://localhost:3000](http://localhost:3000) and API routes at [http://localhost:3000/api/list](http://localhost:3000/api/list) and [http://localhost:3000/api/get/1](http://localhost:3000/api/get/1).

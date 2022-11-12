@@ -25,9 +25,9 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../common";
+} from "../../../../../common";
 
-export interface PokemonInterface extends utils.Interface {
+export interface ERC721RoyaltyInterface extends utils.Interface {
   functions: {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
@@ -36,7 +36,6 @@ export interface PokemonInterface extends utils.Interface {
     "name()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
-    "safeMint(address,string,uint256,string,string,string)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
@@ -55,7 +54,6 @@ export interface PokemonInterface extends utils.Interface {
       | "name"
       | "ownerOf"
       | "royaltyInfo"
-      | "safeMint"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setApprovalForAll"
@@ -89,17 +87,6 @@ export interface PokemonInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "royaltyInfo",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "safeMint",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
-    ]
   ): string;
   encodeFunctionData(
     functionFragment: "safeTransferFrom(address,address,uint256)",
@@ -156,7 +143,6 @@ export interface PokemonInterface extends utils.Interface {
     functionFragment: "royaltyInfo",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "safeMint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "safeTransferFrom(address,address,uint256)",
     data: BytesLike
@@ -183,13 +169,11 @@ export interface PokemonInterface extends utils.Interface {
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
-    "Minted(uint256,string,string,string)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Minted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -217,19 +201,6 @@ export type ApprovalForAllEvent = TypedEvent<
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
-export interface MintedEventObject {
-  tokenId: BigNumber;
-  name: string;
-  types: string;
-  thumbnailUri: string;
-}
-export type MintedEvent = TypedEvent<
-  [BigNumber, string, string, string],
-  MintedEventObject
->;
-
-export type MintedEventFilter = TypedEventFilter<MintedEvent>;
-
 export interface TransferEventObject {
   from: string;
   to: string;
@@ -242,12 +213,12 @@ export type TransferEvent = TypedEvent<
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export interface Pokemon extends BaseContract {
+export interface ERC721Royalty extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: PokemonInterface;
+  interface: ERC721RoyaltyInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -303,16 +274,6 @@ export interface Pokemon extends BaseContract {
       _salePrice: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[string, BigNumber]>;
-
-    safeMint(
-      to: PromiseOrValue<string>,
-      uri: PromiseOrValue<string>,
-      tokenId: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      types: PromiseOrValue<string>,
-      thumbnailUri: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: PromiseOrValue<string>,
@@ -390,16 +351,6 @@ export interface Pokemon extends BaseContract {
     overrides?: CallOverrides
   ): Promise<[string, BigNumber]>;
 
-  safeMint(
-    to: PromiseOrValue<string>,
-    uri: PromiseOrValue<string>,
-    tokenId: PromiseOrValue<BigNumberish>,
-    name: PromiseOrValue<string>,
-    types: PromiseOrValue<string>,
-    thumbnailUri: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   "safeTransferFrom(address,address,uint256)"(
     from: PromiseOrValue<string>,
     to: PromiseOrValue<string>,
@@ -476,16 +427,6 @@ export interface Pokemon extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string, BigNumber]>;
 
-    safeMint(
-      to: PromiseOrValue<string>,
-      uri: PromiseOrValue<string>,
-      tokenId: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      types: PromiseOrValue<string>,
-      thumbnailUri: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     "safeTransferFrom(address,address,uint256)"(
       from: PromiseOrValue<string>,
       to: PromiseOrValue<string>,
@@ -550,19 +491,6 @@ export interface Pokemon extends BaseContract {
       approved?: null
     ): ApprovalForAllEventFilter;
 
-    "Minted(uint256,string,string,string)"(
-      tokenId?: null,
-      name?: null,
-      types?: null,
-      thumbnailUri?: null
-    ): MintedEventFilter;
-    Minted(
-      tokenId?: null,
-      name?: null,
-      types?: null,
-      thumbnailUri?: null
-    ): MintedEventFilter;
-
     "Transfer(address,address,uint256)"(
       from?: PromiseOrValue<string> | null,
       to?: PromiseOrValue<string> | null,
@@ -609,16 +537,6 @@ export interface Pokemon extends BaseContract {
       _tokenId: PromiseOrValue<BigNumberish>,
       _salePrice: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    safeMint(
-      to: PromiseOrValue<string>,
-      uri: PromiseOrValue<string>,
-      tokenId: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      types: PromiseOrValue<string>,
-      thumbnailUri: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     "safeTransferFrom(address,address,uint256)"(
@@ -696,16 +614,6 @@ export interface Pokemon extends BaseContract {
       _tokenId: PromiseOrValue<BigNumberish>,
       _salePrice: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    safeMint(
-      to: PromiseOrValue<string>,
-      uri: PromiseOrValue<string>,
-      tokenId: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      types: PromiseOrValue<string>,
-      thumbnailUri: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     "safeTransferFrom(address,address,uint256)"(
