@@ -118,29 +118,49 @@ const PokemonDetails: NextPage<{
         />
       </Box>
       <Text fontSize="5xl">{name}</Text>
-      {listing && (
+      {signer && listing && (
         <StatGroup mt={4}>
           <Stat>
             <StatLabel>Listed price</StatLabel>
             <StatNumber>
               {ethers.utils.formatEther(listing.price).toString()} MATIC
-              {connectedAddress !== listing.seller && signer && (
+              {connectedAddress !== listing.seller && (
                 <Button
                   ml={4}
                   mb={2}
                   position="absolute"
-                  onClick={() => {
-                    if (query.id) {
-                      marketplaceContract
-                        .connect(signer)
-                        .buyItem(pokemonContract.address, query.id.toString(), {
+                  onClick={() =>
+                    marketplaceContract
+                      .connect(signer)
+                      .buyItem(
+                        pokemonContract.address,
+                        (query.id || 0).toString(),
+                        {
                           value: ethers.BigNumber.from(listing.price),
-                        })
-                        .catch(console.log);
-                    }
-                  }}
+                        }
+                      )
+                      .catch(console.log)
+                  }
                 >
-                  Buy
+                  Buy item
+                </Button>
+              )}
+              {connectedAddress === listing.seller && (
+                <Button
+                  ml={4}
+                  mb={2}
+                  position="absolute"
+                  onClick={() =>
+                    marketplaceContract
+                      .connect(signer)
+                      .cancelListing(
+                        pokemonContract.address,
+                        (query.id || 0).toString()
+                      )
+                      .catch(console.log)
+                  }
+                >
+                  Cancel listing
                 </Button>
               )}
             </StatNumber>
