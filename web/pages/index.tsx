@@ -8,25 +8,42 @@ import {
   InputLeftAddon,
 } from "@chakra-ui/react";
 import { omitBy, debounce } from "lodash";
-import { PokedexTable } from "../components/PokedexTable";
-import { host } from "../shared/host";
+import { PokedexTable } from "web/components/PokedexTable";
+import { pokemonContract } from "web/shared/contract";
 import type { NextPage, GetServerSideProps } from "next";
-import type { Pokedex } from "../types/Pokemon";
+import type { Pokedex } from "web/types/Pokemon";
 
-export const getServerSideProps: GetServerSideProps = async ({
-  query,
-  res,
-}) => {
-  const pokedex = await fetch(`${host}/api/list`, {
-    method: "POST",
-    body: JSON.stringify({
-      name: query?.name?.toString() || "",
-      type: query?.type?.toString() || "",
-    }),
-  }).then((res) => res.json());
+let pokedex: Pokedex;
 
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  if (!pokedex) {
+    pokedex = await pokemonContract
+      .queryFilter(pokemonContract.filters.Minted())
+      .then((mintedEvents) =>
+        mintedEvents.reduce(
+          (acc, cur) => [
+            ...acc,
+            {
+              tokenId: cur.args[0].toString(),
+              name: cur.args[1],
+              types: cur.args[2],
+              cidThumbnail: cur.args[3],
+            },
+          ],
+          [] as Pokedex
+        )
+      );
+  }
   return {
-    props: { pokedex },
+    props: {
+      pokedex: pokedex.filter(
+        ({ name, types }) =>
+          (!query.name ||
+            name.toLowerCase().includes(query.name.toString().toLowerCase())) &&
+          (!query.type ||
+            types.toLowerCase().includes(query.type.toString().toLowerCase()))
+      ),
+    },
   };
 };
 

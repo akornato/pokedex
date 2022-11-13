@@ -6,9 +6,9 @@ Deployed at https://pokemon-nft-web.vercel.app and [Polygon Mumbai](https://mumb
 
 The web app has a listing page to view all available Pokemons (both listed or not), and a details page, which allows to list or buy the Pokemons on the Marketplace.
 
-The listing page [API route](https://pokemon-nft-web.vercel.app/api/list) gets its data from contract logs of a non-standard `Minted` event. The event provides only the basic info of token id, name, types, and a thumbnail url, just sufficient for the listing page to display and filter Pokemons (by name and type).
+The listing page gets its data from contract logs of a non-standard `Minted` event. The event provides only the basic info of token id, name, types, and a thumbnail url, just sufficient for the listing page to display and filter Pokemons (by name and type).
 
-The details page [API route](https://pokemon-nft-web.vercel.app/api/get/1) on the other hand gets full description, high res image url and remaining attributes for a single Pokemon via standard ERC721's `tokenURI` which returns IPFS CID for its metadata. The page also hits the Marketplace contract to get the Pokemon's listing (if any) information.
+The details page on the other hand gets full description, high res image url and remaining attributes for a single Pokemon via standard ERC721's `tokenURI` which returns IPFS CID for its metadata. The page also hits the Marketplace contract to get the Pokemon's listing (if any) information.
 
 Both thumbnails (listing page) and high res images (details page) are stored on IPFS, with CIDs in contract logs for the former, and in Pokemon `image` metadata field for the latter.
 
