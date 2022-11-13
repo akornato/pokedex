@@ -62,6 +62,7 @@ const PokemonDetails: NextPage<{
   listing?: { price: string; seller: string };
 }> = ({ pokemon, listing }) => {
   const { query, push } = useRouter();
+  const tokenId = (query.id || 0).toString();
   const { address: connectedAddress, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
@@ -102,7 +103,7 @@ const PokemonDetails: NextPage<{
           {isConnected
             ? `${connectedAddress?.substring(
                 0,
-                6
+                5
               )}...${connectedAddress?.substring(connectedAddress.length - 4)}`
             : "Connect"}
         </Button>
@@ -118,13 +119,13 @@ const PokemonDetails: NextPage<{
         />
       </Box>
       <Text fontSize="5xl">{name}</Text>
-      {signer && listing && (
+      {listing && (
         <StatGroup mt={4}>
           <Stat>
             <StatLabel>Listed price</StatLabel>
             <StatNumber>
               {ethers.utils.formatEther(listing.price).toString()} MATIC
-              {connectedAddress !== listing.seller && (
+              {signer && connectedAddress !== listing.seller && (
                 <Button
                   ml={4}
                   mb={2}
@@ -132,20 +133,16 @@ const PokemonDetails: NextPage<{
                   onClick={() =>
                     marketplaceContract
                       .connect(signer)
-                      .buyItem(
-                        pokemonContract.address,
-                        (query.id || 0).toString(),
-                        {
-                          value: ethers.BigNumber.from(listing.price),
-                        }
-                      )
+                      .buyItem(pokemonContract.address, tokenId, {
+                        value: ethers.BigNumber.from(listing.price),
+                      })
                       .catch(console.log)
                   }
                 >
                   Buy item
                 </Button>
               )}
-              {connectedAddress === listing.seller && (
+              {signer && connectedAddress === listing.seller && (
                 <Button
                   ml={4}
                   mb={2}
@@ -153,10 +150,7 @@ const PokemonDetails: NextPage<{
                   onClick={() =>
                     marketplaceContract
                       .connect(signer)
-                      .cancelListing(
-                        pokemonContract.address,
-                        (query.id || 0).toString()
-                      )
+                      .cancelListing(pokemonContract.address, tokenId)
                       .catch(console.log)
                   }
                 >
@@ -168,11 +162,32 @@ const PokemonDetails: NextPage<{
           <Stat>
             <StatLabel>Seller</StatLabel>
             <StatNumber>
-              {listing.seller.substring(0, 6)}...
+              {listing.seller.substring(0, 5)}...
               {listing.seller.substring(listing.seller.length - 4)}
             </StatNumber>
           </Stat>
         </StatGroup>
+      )}
+      {signer && !listing && (
+        <Button
+          mt={2}
+          onClick={async () => {
+            const tx = await pokemonContract
+              .connect(signer)
+              .approve(marketplaceContract.address, tokenId);
+            await tx.wait();
+            await marketplaceContract
+              .connect(signer)
+              .listItem(
+                pokemonContract.address,
+                tokenId,
+                ethers.utils.parseEther("0.001")
+              )
+              .catch(console.log);
+          }}
+        >
+          List item
+        </Button>
       )}
       <Text mt={4} fontSize="lg">
         {description}
