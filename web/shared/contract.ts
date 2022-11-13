@@ -3,19 +3,14 @@ import { abi as marketplaceAbi } from "sol/artifacts/contracts/Marketplace.sol/M
 import { abi as pokemonAbi } from "sol/artifacts/contracts/Pokemon.sol/Pokemon.json";
 import type { Marketplace, Pokemon } from "sol/typechain-types";
 
-declare global {
-  interface Window {
-    ethereum: ethers.providers.ExternalProvider;
-  }
-}
-
 const isDevelopment = process.env.NODE_ENV === "development";
 
 const provider:
   | ethers.providers.Web3Provider
   | ethers.providers.JsonRpcProvider =
   typeof window !== "undefined"
-    ? new ethers.providers.Web3Provider(window.ethereum)
+    ? // @ts-ignore
+      new ethers.providers.Web3Provider(window.ethereum)
     : new ethers.providers.JsonRpcProvider(
         isDevelopment ? "http://127.0.0.1:8545" : process.env.ALCHEMY_URL
       );

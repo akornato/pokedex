@@ -1,7 +1,20 @@
 import Head from "next/head";
 import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "../shared/theme";
+import { WagmiConfig, createClient, chain, configureChains } from "wagmi";
+import { publicProvider } from "wagmi/providers/public";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import type { AppProps } from "next/app";
+
+const { chains, provider } = configureChains(
+  [chain.polygonMumbai, chain.hardhat],
+  [publicProvider()]
+);
+
+const client = createClient({
+  connectors: [new MetaMaskConnector({ chains })],
+  provider,
+});
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -11,7 +24,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ChakraProvider theme={theme}>
-        <Component {...pageProps} />
+        <WagmiConfig client={client}>
+          <Component {...pageProps} />
+        </WagmiConfig>
       </ChakraProvider>
     </>
   );

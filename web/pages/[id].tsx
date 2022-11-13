@@ -10,9 +10,12 @@ import {
   StatGroup,
   Text,
   Button,
+  Flex,
+  Spacer,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
+import { useConnect, useDisconnect, useAccount } from "wagmi";
 import { motion } from "framer-motion";
 import { base64Shimmer } from "web/shared/shimmer";
 import { pokemonContract, marketplaceContract } from "web/shared/contract";
@@ -58,6 +61,9 @@ const PokemonDetails: NextPage<{
   listing?: { price: string; seller: string };
 }> = ({ pokemon, listing }) => {
   const { query, push } = useRouter();
+  const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   const [buttonLoading, setButtonLoading] = useState(false);
   const { name, description, image, attributes } = pokemon;
 
@@ -68,22 +74,36 @@ const PokemonDetails: NextPage<{
       animate="enter"
       variants={{ hidden: { opacity: 0 }, enter: { opacity: 1 } }}
     >
-      <Button
-        leftIcon={<ArrowBackIcon />}
-        onClick={() => {
-          setButtonLoading(true);
-          push({
-            pathname: "/",
-            query: {
-              ...(query.name ? { name: query.name } : {}),
-              ...(query.type ? { type: query.type } : {}),
-            },
-          });
-        }}
-        isLoading={buttonLoading}
-      >
-        Pokedex
-      </Button>
+      <Flex>
+        <Button
+          leftIcon={<ArrowBackIcon />}
+          onClick={() => {
+            setButtonLoading(true);
+            push({
+              pathname: "/",
+              query: {
+                ...(query.name ? { name: query.name } : {}),
+                ...(query.type ? { type: query.type } : {}),
+              },
+            });
+          }}
+          isLoading={buttonLoading}
+        >
+          Pokedex
+        </Button>
+        <Spacer />
+        <Button
+          onClick={() =>
+            isConnected ? disconnect() : connect({ connector: connectors[0] })
+          }
+        >
+          {isConnected
+            ? `${address?.substring(0, 6)}...${address?.substring(
+                address.length - 4
+              )}`
+            : "Connect"}
+        </Button>
+      </Flex>
       <Box mt={4}>
         <Image
           width={400}
