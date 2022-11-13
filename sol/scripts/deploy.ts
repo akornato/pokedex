@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { Pokemon, Marketplace } from "../typechain-types";
 import mintFeed from "scripts/data/mint-feed.json";
 
@@ -17,8 +17,8 @@ async function main() {
 
   const PokemonContractFactory = await ethers.getContractFactory("Pokemon");
   const pokemonContract: Pokemon = await PokemonContractFactory.deploy(
-    owner.address, // royalty receiver
-    1000 // 1% royalty
+    process.env.ROYALTY_RECEIVER_ADDRESS || owner.address, // royalty receiver
+    5000 // 50% royalty
   );
   await pokemonContract.deployed();
   console.log(`Pokemon contract deployed to ${pokemonContract.address}`);
@@ -27,7 +27,7 @@ async function main() {
   //   "0x22448d0D2a0685c713e568272de1aFc7F8BEE644"
   // );
 
-  for (const pokemon of mintFeed.slice(0, 1)) {
+  for (const pokemon of mintFeed.slice(0, 5)) {
     try {
       await pokemonContract.tokenURI(pokemon.tokenId);
       console.log(`Pokemon tokenId ${pokemon.tokenId} already minted`);
@@ -61,6 +61,17 @@ async function main() {
         `Pokemon tokenId ${pokemon.tokenId} listed, tx ${txListItem.hash}`
       );
     }
+  }
+
+  if (network.name === "localhost") {
+    const tx = await owner.sendTransaction({
+      to: process.env.TEST_BUYER_ADDRESS,
+      value: ethers.utils.parseEther("1.0"),
+    });
+    await tx.wait();
+    console.log(
+      `1 ETH sent to test buyer address ${process.env.TEST_BUYER_ADDRESS}`
+    );
   }
 }
 

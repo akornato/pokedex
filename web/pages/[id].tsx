@@ -15,10 +15,10 @@ import {
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
-import { useConnect, useDisconnect, useAccount } from "wagmi";
+import { useConnect, useDisconnect, useAccount, useSigner } from "wagmi";
 import { motion } from "framer-motion";
 import { base64Shimmer } from "web/shared/shimmer";
-import { pokemonContract, marketplaceContract } from "web/shared/contract";
+import { pokemonContract, marketplaceContract } from "web/shared/contracts";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokemon } from "web/types/Pokemon";
 
@@ -41,10 +41,11 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       .getListing(pokemonContract.address, tokenId)
       .catch(() => {}),
   ]);
+
   return {
     props: {
       pokemon,
-      ...(listing
+      ...(listing && listing.seller !== ethers.constants.AddressZero
         ? {
             listing: {
               price: listing[0].toString(),
@@ -61,9 +62,10 @@ const PokemonDetails: NextPage<{
   listing?: { price: string; seller: string };
 }> = ({ pokemon, listing }) => {
   const { query, push } = useRouter();
-  const { address, isConnected } = useAccount();
+  const { address: connectedAddress, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
+  const { data: signer } = useSigner();
   const [buttonLoading, setButtonLoading] = useState(false);
   const { name, description, image, attributes } = pokemon;
 
@@ -98,9 +100,10 @@ const PokemonDetails: NextPage<{
           }
         >
           {isConnected
-            ? `${address?.substring(0, 6)}...${address?.substring(
-                address.length - 4
-              )}`
+            ? `${connectedAddress?.substring(
+                0,
+                6
+              )}...${connectedAddress?.substring(connectedAddress.length - 4)}`
             : "Connect"}
         </Button>
       </Flex>
@@ -121,6 +124,25 @@ const PokemonDetails: NextPage<{
             <StatLabel>Listed price</StatLabel>
             <StatNumber>
               {ethers.utils.formatEther(listing.price).toString()} MATIC
+              {connectedAddress !== listing.seller && signer && (
+                <Button
+                  ml={4}
+                  mb={2}
+                  position="absolute"
+                  onClick={() => {
+                    if (query.id) {
+                      marketplaceContract
+                        .connect(signer)
+                        .buyItem(pokemonContract.address, query.id.toString(), {
+                          value: ethers.BigNumber.from(listing.price),
+                        })
+                        .catch(console.log);
+                    }
+                  }}
+                >
+                  Buy
+                </Button>
+              )}
             </StatNumber>
           </Stat>
           <Stat>
