@@ -12,7 +12,7 @@ const jsonRpcProvider = new ethers.providers.JsonRpcProvider(
 export const marketplaceContract = new ethers.Contract(
   isDevelopment
     ? "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-    : "0x22448d0D2a0685c713e568272de1aFc7F8BEE644",
+    : "0x6661231833749D4649eFb00EAbDa81F0c223da74",
   marketplaceAbi,
   jsonRpcProvider
 ) as Marketplace;
@@ -20,7 +20,7 @@ export const marketplaceContract = new ethers.Contract(
 export const pokemonContract = new ethers.Contract(
   isDevelopment
     ? "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-    : "0x22448d0D2a0685c713e568272de1aFc7F8BEE644",
+    : "0xFA22cF375609Cb1897237a88FdfAF05cDA271F5B",
   pokemonAbi,
   jsonRpcProvider
 ) as Pokemon;
