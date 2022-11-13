@@ -96,12 +96,21 @@ const PokemonDetails: NextPage<{
       </Box>
       <Text fontSize="5xl">{name}</Text>
       {listing && (
-        <Stat mt={4}>
-          <StatLabel>Listed price</StatLabel>
-          <StatNumber>
-            {ethers.utils.formatEther(listing.price).toString()} MATIC
-          </StatNumber>
-        </Stat>
+        <StatGroup mt={4}>
+          <Stat>
+            <StatLabel>Listed price</StatLabel>
+            <StatNumber>
+              {ethers.utils.formatEther(listing.price).toString()} MATIC
+            </StatNumber>
+          </Stat>
+          <Stat>
+            <StatLabel>Seller</StatLabel>
+            <StatNumber>
+              {listing.seller.substring(0, 6)}...
+              {listing.seller.substring(listing.seller.length - 4)}
+            </StatNumber>
+          </Stat>
+        </StatGroup>
       )}
       <Text mt={4} fontSize="lg">
         {description}
