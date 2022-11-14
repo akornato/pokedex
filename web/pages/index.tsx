@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { omitBy, debounce } from "lodash";
 import { PokedexTable } from "web/components/PokedexTable";
-import { pokemonContract } from "web/shared/contracts";
+import { getPokemonContract } from "web/shared/contracts";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokedex } from "web/types/Pokemon";
 
@@ -17,6 +17,7 @@ let pokedex: Pokedex;
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   if (!pokedex) {
+    const pokemonContract = getPokemonContract();
     pokedex = await pokemonContract
       .queryFilter(pokemonContract.filters.Minted())
       .then((mintedEvents) =>

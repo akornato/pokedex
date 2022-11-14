@@ -1,4 +1,5 @@
 import { ethers, network } from "hardhat";
+import fs from "fs-extra";
 import { Pokemon, Marketplace } from "../typechain-types";
 import mintFeed from "scripts/data/mint-feed.json";
 
@@ -14,6 +15,9 @@ async function main() {
   console.log(
     `Marketplace contract deployed to ${marketplaceContract.address}`
   );
+  fs.outputJsonSync(`deploy/Marketplace.${network.name}.json`, {
+    address: marketplaceContract.address,
+  });
 
   const PokemonContractFactory = await ethers.getContractFactory("Pokemon");
   const pokemonContract: Pokemon = await PokemonContractFactory.deploy(
@@ -22,6 +26,9 @@ async function main() {
   );
   await pokemonContract.deployed();
   console.log(`Pokemon contract deployed to ${pokemonContract.address}`);
+  fs.outputJsonSync(`deploy/Pokemon.${network.name}.json`, {
+    address: pokemonContract.address,
+  });
 
   // const pokemonContract: Pokemon = await PokemonContractFactory.attach(
   //   "0x22448d0D2a0685c713e568272de1aFc7F8BEE644"

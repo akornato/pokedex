@@ -1,26 +1,47 @@
 import { ethers } from "ethers";
+import { chain as chains } from "wagmi";
+import { address as hardhatMarketplaceAddress } from "sol/deploy/Marketplace.localhost.json";
+import { address as mumbaiMarketplaceAddress } from "sol/deploy/Marketplace.mumbai.json";
+import { address as hardhatPokemonAddress } from "sol/deploy/Pokemon.localhost.json";
+import { address as mumbaiPokemonAddress } from "sol/deploy/Pokemon.mumbai.json";
 import { abi as marketplaceAbi } from "sol/artifacts/contracts/Marketplace.sol/Marketplace.json";
 import { abi as pokemonAbi } from "sol/artifacts/contracts/Pokemon.sol/Pokemon.json";
 import type { Marketplace, Pokemon } from "sol/typechain-types";
 
-const isDevelopment = process.env.NODE_ENV === "development";
+const jsonRpcProvider = {
+  [chains.polygonMumbai.id]: new ethers.providers.JsonRpcProvider(
+    process.env.ALCHEMY_URL
+  ),
+  [chains.hardhat.id]: new ethers.providers.JsonRpcProvider(
+    "http://127.0.0.1:8545"
+  ),
+};
 
-const jsonRpcProvider = new ethers.providers.JsonRpcProvider(
-  isDevelopment ? "http://127.0.0.1:8545" : process.env.ALCHEMY_URL
-);
+const marketPlaceAddresses = {
+  [chains.polygonMumbai.id]: mumbaiMarketplaceAddress,
+  [chains.hardhat.id]: hardhatMarketplaceAddress,
+};
 
-export const marketplaceContract = new ethers.Contract(
-  isDevelopment
-    ? "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-    : "0x6661231833749D4649eFb00EAbDa81F0c223da74",
-  marketplaceAbi,
-  jsonRpcProvider
-) as Marketplace;
+const pokemonAddresses = {
+  [chains.polygonMumbai.id]: mumbaiPokemonAddress,
+  [chains.hardhat.id]: hardhatPokemonAddress,
+};
 
-export const pokemonContract = new ethers.Contract(
-  isDevelopment
-    ? "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-    : "0xFA22cF375609Cb1897237a88FdfAF05cDA271F5B",
-  pokemonAbi,
-  jsonRpcProvider
-) as Pokemon;
+const defaultChainId =
+  process.env.NODE_ENV === "development"
+    ? chains.hardhat.id
+    : chains.polygonMumbai.id;
+
+export const getMarketplaceContract = (chainId?: number) =>
+  new ethers.Contract(
+    marketPlaceAddresses[chainId || defaultChainId],
+    marketplaceAbi,
+    jsonRpcProvider[chainId || defaultChainId]
+  ) as Marketplace;
+
+export const getPokemonContract = (chainId?: number) =>
+  new ethers.Contract(
+    pokemonAddresses[chainId || defaultChainId],
+    pokemonAbi,
+    jsonRpcProvider[chainId || defaultChainId]
+  ) as Pokemon;

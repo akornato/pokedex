@@ -15,10 +15,19 @@ import {
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
-import { useConnect, useDisconnect, useAccount, useSigner } from "wagmi";
+import {
+  useConnect,
+  useDisconnect,
+  useAccount,
+  useSigner,
+  useNetwork,
+} from "wagmi";
 import { motion } from "framer-motion";
 import { base64Shimmer } from "web/shared/shimmer";
-import { pokemonContract, marketplaceContract } from "web/shared/contracts";
+import {
+  getPokemonContract,
+  getMarketplaceContract,
+} from "web/shared/contracts";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokemon } from "web/types/Pokemon";
 
@@ -29,6 +38,8 @@ MotionBox.displayName = "MotionBox";
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const tokenId = parseInt(query.id?.toString() || "");
+  const marketplaceContract = getMarketplaceContract();
+  const pokemonContract = getPokemonContract();
   const [pokemon, listing] = await Promise.all([
     pokemonContract
       .tokenURI(tokenId)
@@ -63,6 +74,9 @@ const PokemonDetails: NextPage<{
 }> = ({ pokemon, listing }) => {
   const { query, push } = useRouter();
   const tokenId = (query.id || 0).toString();
+  const { chain } = useNetwork();
+  const marketplaceContract = getMarketplaceContract(chain?.id);
+  const pokemonContract = getPokemonContract(chain?.id);
   const { address: connectedAddress, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
