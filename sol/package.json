@@ -4,7 +4,7 @@
   "scripts": {
     "sol:node": "hardhat node",
     "sol:clean": "hardhat clean",
-    "sol:compile": "hardhat compile",
+    "sol:compile": "hardhat compile && ts-node scripts/extract-abi-consts",
     "sol:test": "hardhat test",
     "sol:deploy": "hardhat run --network localhost ./scripts/deploy.ts",
     "sol:deploy:mumbai": "hardhat run --network mumbai scripts/deploy.ts",

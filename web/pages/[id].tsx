@@ -28,6 +28,7 @@ import {
   getPokemonContract,
   getMarketplaceContract,
 } from "web/shared/contracts";
+import { useListing } from "web/hooks/useListing";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokemon } from "web/types/Pokemon";
 
@@ -38,42 +39,25 @@ MotionBox.displayName = "MotionBox";
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const tokenId = parseInt(query.id?.toString() || "");
-  const marketplaceContract = getMarketplaceContract();
   const pokemonContract = getPokemonContract();
-  const [pokemon, listing] = await Promise.all([
-    pokemonContract
-      .tokenURI(tokenId)
-      .then((cid) =>
-        fetch(`https://pokemon-nft.infura-ipfs.io/ipfs/${cid}`).then((res) =>
-          res.json()
-        )
-      ),
-    marketplaceContract
-      .getListing(pokemonContract.address, tokenId)
-      .catch(() => {}),
-  ]);
-
   return {
     props: {
-      pokemon,
-      ...(listing && listing.seller !== ethers.constants.AddressZero
-        ? {
-            listing: {
-              price: listing[0].toString(),
-              seller: listing[1],
-            },
-          }
-        : {}),
+      pokemon: await pokemonContract
+        .tokenURI(tokenId)
+        .then((cid) =>
+          fetch(`https://pokemon-nft.infura-ipfs.io/ipfs/${cid}`).then((res) =>
+            res.json()
+          )
+        ),
     },
   };
 };
 
 const PokemonDetails: NextPage<{
   pokemon: Pokemon;
-  listing?: { price: string; seller: string };
-}> = ({ pokemon, listing }) => {
+}> = ({ pokemon }) => {
   const { query, push } = useRouter();
-  const tokenId = (query.id || 0).toString();
+  const tokenId = ethers.BigNumber.from(query?.id?.toString());
   const { chain } = useNetwork();
   const marketplaceContract = getMarketplaceContract(chain?.id);
   const pokemonContract = getPokemonContract(chain?.id);
@@ -83,6 +67,7 @@ const PokemonDetails: NextPage<{
   const { data: signer } = useSigner();
   const [buttonLoading, setButtonLoading] = useState(false);
   const { name, description, image, attributes } = pokemon;
+  const listing = useListing(tokenId);
 
   return (
     <MotionBox
@@ -139,7 +124,7 @@ const PokemonDetails: NextPage<{
             <StatLabel>Listed price</StatLabel>
             <StatNumber>
               {ethers.utils.formatEther(listing.price).toString()} MATIC
-              {signer && connectedAddress !== listing.seller && (
+              {isConnected && signer && connectedAddress !== listing.seller && (
                 <Button
                   ml={4}
                   mb={2}
@@ -156,7 +141,7 @@ const PokemonDetails: NextPage<{
                   Buy item
                 </Button>
               )}
-              {signer && connectedAddress === listing.seller && (
+              {isConnected && signer && connectedAddress === listing.seller && (
                 <Button
                   ml={4}
                   mb={2}
@@ -182,7 +167,7 @@ const PokemonDetails: NextPage<{
           </Stat>
         </StatGroup>
       )}
-      {signer && !listing && (
+      {isConnected && signer && !listing && (
         <Button
           mt={2}
           onClick={async () => {
