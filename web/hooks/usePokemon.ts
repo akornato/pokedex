@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useContractRead } from "wagmi";
-import { useAddresses } from "web/hooks/useAddresses";
+import { useNetwork, useContractRead } from "wagmi";
+import { getAddresses } from "web/shared/addresses";
 import { abi } from "web/shared/Pokemon.abi.const";
 import type { Pokemon } from "web/types/Pokemon";
 
 export const usePokemon = (tokenId: ethers.BigNumber) => {
+  const { chain } = useNetwork();
   const [pokemon, setPokemon] = useState<Pokemon>();
-  const { pokemonAddress } = useAddresses();
+  const { pokemonAddress } = getAddresses(chain?.id);
   const { data: owner } = useContractRead({
     address: pokemonAddress,
     abi,

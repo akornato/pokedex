@@ -6,9 +6,9 @@ Deployed at https://pokemon-nft-web.vercel.app and [Polygon Mumbai](https://mumb
 
 The web app has a listing page to view all available Pokemons (both listed or not), and a details page, which allows to list or buy the Pokemons on the Marketplace.
 
-The listing page gets Pokemon data from contract logs of a non-standard `Minted` event. The event provides only the basic info of token id, name, types, and a thumbnail url, just sufficient for the listing page to display and filter Pokemons (by name and type).
+The listing page gets and caches Pokemon data on SSR from contract logs of a non-standard `Minted` event. The event provides only the basic info of token id, name, types, and a thumbnail url, just sufficient for the listing page to display and filter Pokemons (by name and type).
 
-The details page gets full Pokemon data such as full description, high res image url and remaining attributes via standard ERC721's `tokenURI` which returns IPFS CID for its metadata. On the client the page also gets the listing from the Marketplace (if any), and keeps it fresh on new blocks.
+The details page gets full Pokemon data on the client such as full description, high res image url and remaining attributes via standard ERC721's `tokenURI` which returns IPFS CID for its metadata. The page also gets the listing from the Marketplace, if any, and keeps its status up to date on new blocks.
 
 Both thumbnails (listing page) and high res images (details page) are stored on IPFS, with CIDs in contract logs for the former, and in Pokemon `image` metadata field for the latter.
 
@@ -16,7 +16,7 @@ The state for name & type filters at the root page is kept in url query params s
 
 - the filters are retained when returning from the details page
 - the root page is server side rendered efficiently with Pokemon data filtered as per the url
-- filter changes on the client trigger Next.js client-side page transitions which send a request to the server to update Pokemon data (see [when does getServerSideProps run](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#when-does-getserversideprops-run)).
+- filter changes on the client trigger Next.js client-side page transitions which send a request to the server to update Pokemon data (see [when does getServerSideProps run](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props#when-does-getserversideprops-run))
 
 ## Getting Started
 

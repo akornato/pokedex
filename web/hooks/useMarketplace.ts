@@ -1,19 +1,21 @@
 import { ethers } from "ethers";
 import {
+  useNetwork,
   useAccount,
   useContractRead,
   usePrepareContractWrite,
   useContractWrite,
 } from "wagmi";
-import { useAddresses } from "web/hooks/useAddresses";
+import { getAddresses } from "web/shared/addresses";
 import { abi as abiPokemon } from "web/shared/Pokemon.abi.const";
 import { abi as abiMarketplace } from "web/shared/Marketplace.abi.const";
 
 type Address = `0x${string}`;
 
 export const useMarketplace = (tokenId: ethers.BigNumber, owner?: Address) => {
+  const { chain } = useNetwork();
   const { address: connectedAddress } = useAccount();
-  const { marketplaceAddress, pokemonAddress } = useAddresses();
+  const { marketplaceAddress, pokemonAddress } = getAddresses(chain?.id);
   const { data: listing } = useContractRead({
     address: marketplaceAddress,
     abi: abiMarketplace,

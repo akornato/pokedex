@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ethers } from "ethers";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -7,17 +8,64 @@ import {
   InputGroup,
   InputLeftAddon,
   Spacer,
-  Spinner,
 } from "@chakra-ui/react";
+import { chain as chains } from "wagmi";
 import { omitBy, debounce } from "lodash";
 import { PokedexTable } from "web/components/PokedexTable";
-import { usePokedex } from "web/hooks/usePokedex";
 import { ConnectButton } from "web/components/ConnectButton";
-import type { NextPage } from "next";
+import { getAddresses } from "web/shared/addresses";
+import { abi as pokemonAbi } from "sol/artifacts/contracts/Pokemon.sol/Pokemon.json";
+import type { NextPage, GetServerSideProps } from "next";
+import type { Pokedex } from "web/types/Pokemon";
 
-const Home: NextPage = () => {
+let pokedexCache: { [network: string]: Pokedex } = {};
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const chainId =
+    parseInt(query?.chainId?.toString() || "0") || chains.polygonMumbai.id;
+  const { pokemonAddress } = getAddresses(chainId);
+  if (!pokedexCache[chainId]) {
+    const pokemonContract = new ethers.Contract(
+      pokemonAddress,
+      pokemonAbi,
+      new ethers.providers.JsonRpcProvider(
+        chainId === chains.hardhat.id
+          ? "http://127.0.0.1:8545"
+          : `https://polygon-mumbai.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`
+      )
+    );
+    pokedexCache[chainId] = await pokemonContract
+      .queryFilter(pokemonContract.filters.Minted())
+      .then((mintedEvents) =>
+        mintedEvents.reduce(
+          (acc, cur) => [
+            ...acc,
+            {
+              tokenId: cur?.args?.[0].toString(),
+              name: cur?.args?.[1],
+              types: cur?.args?.[2],
+              cidThumbnail: cur?.args?.[3],
+            },
+          ],
+          [] as Pokedex
+        )
+      );
+  }
+  return {
+    props: {
+      pokedex: pokedexCache[chainId].filter(
+        ({ name, types }) =>
+          (!query.name ||
+            name.toLowerCase().includes(query.name.toString().toLowerCase())) &&
+          (!query.type ||
+            types.toLowerCase().includes(query.type.toString().toLowerCase()))
+      ),
+    },
+  };
+};
+
+const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
   const { query, push } = useRouter();
-  const pokedex = usePokedex();
 
   const onChange = useMemo(
     () =>
@@ -33,12 +81,6 @@ const Home: NextPage = () => {
 
   return (
     <Box p={4}>
-      {!pokedex && (
-        <Spinner
-          size="xl"
-          style={{ position: "fixed", bottom: "1rem", left: "1rem" }}
-        />
-      )}
       <Stack direction="row">
         <InputGroup maxWidth="xs">
           <InputLeftAddon>Name</InputLeftAddon>

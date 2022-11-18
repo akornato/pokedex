@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { forwardRef } from "@chakra-ui/react";
@@ -13,7 +12,6 @@ import {
   Stack,
   Spacer,
   Spinner,
-  Skeleton,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
@@ -88,7 +86,7 @@ const PokemonDetails: NextPage = () => {
             blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(400, 400)}`}
           />
         ) : (
-          <Skeleton width={400} height={400} />
+          <Box width={400} height={400} />
         )}
       </Box>
       <Text fontSize="5xl">{name}</Text>
