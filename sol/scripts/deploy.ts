@@ -30,11 +30,9 @@ async function main() {
     address: pokemonContract.address,
   });
 
-  // const pokemonContract: Pokemon = await PokemonContractFactory.attach(
-  //   "0x22448d0D2a0685c713e568272de1aFc7F8BEE644"
-  // );
-
-  for (const pokemon of mintFeed.slice(0, 5)) {
+  for (const pokemon of network.name === "localhost"
+    ? mintFeed.slice(0, 15)
+    : mintFeed) {
     try {
       await pokemonContract.tokenURI(pokemon.tokenId);
       console.log(`Pokemon tokenId ${pokemon.tokenId} already minted`);

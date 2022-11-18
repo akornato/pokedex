@@ -24,10 +24,10 @@ MotionTr.displayName = "MotionTr";
 
 const itemsPerPage = 10;
 
-export const PokedexTable: React.FC<{ pokedex: Pokedex }> = ({ pokedex }) => {
+export const PokedexTable: React.FC<{ pokedex?: Pokedex }> = ({ pokedex }) => {
   const { query, push } = useRouter();
   const [page, setPage] = useState({ count: 1, scrollY: 0 });
-  const filteredPokedex = pokedex.filter(
+  const filteredPokedex = pokedex?.filter(
     (_, i) => i < page.count * itemsPerPage
   );
 
@@ -49,7 +49,7 @@ export const PokedexTable: React.FC<{ pokedex: Pokedex }> = ({ pokedex }) => {
         </Thead>
         <Tbody>
           <AnimatePresence>
-            {filteredPokedex.map(({ tokenId, name, types, cidThumbnail }) => (
+            {filteredPokedex?.map(({ tokenId, name, types, cidThumbnail }) => (
               <MotionTr
                 key={tokenId}
                 layout

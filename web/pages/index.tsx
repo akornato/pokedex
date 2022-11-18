@@ -6,50 +6,17 @@ import {
   Input,
   InputGroup,
   InputLeftAddon,
+  Spacer,
 } from "@chakra-ui/react";
 import { omitBy, debounce } from "lodash";
 import { PokedexTable } from "web/components/PokedexTable";
-import { getPokemonContract } from "web/shared/contracts";
-import type { NextPage, GetServerSideProps } from "next";
-import type { Pokedex } from "web/types/Pokemon";
+import { usePokedex } from "web/hooks/usePokedex";
+import { ConnectButton } from "web/components/ConnectButton";
+import type { NextPage } from "next";
 
-let pokedex: Pokedex;
-
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  if (!pokedex) {
-    const pokemonContract = getPokemonContract();
-    pokedex = await pokemonContract
-      .queryFilter(pokemonContract.filters.Minted())
-      .then((mintedEvents) =>
-        mintedEvents.reduce(
-          (acc, cur) => [
-            ...acc,
-            {
-              tokenId: cur.args[0].toString(),
-              name: cur.args[1],
-              types: cur.args[2],
-              cidThumbnail: cur.args[3],
-            },
-          ],
-          [] as Pokedex
-        )
-      );
-  }
-  return {
-    props: {
-      pokedex: pokedex.filter(
-        ({ name, types }) =>
-          (!query.name ||
-            name.toLowerCase().includes(query.name.toString().toLowerCase())) &&
-          (!query.type ||
-            types.toLowerCase().includes(query.type.toString().toLowerCase()))
-      ),
-    },
-  };
-};
-
-const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
+const Home: NextPage = () => {
   const { query, push } = useRouter();
+  const pokedex = usePokedex();
 
   const onChange = useMemo(
     () =>
@@ -66,7 +33,7 @@ const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
   return (
     <Box p={4}>
       <Stack direction="row">
-        <InputGroup>
+        <InputGroup maxWidth="xs">
           <InputLeftAddon>Name</InputLeftAddon>
           <Input
             type="string"
@@ -75,7 +42,7 @@ const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
           />
         </InputGroup>
 
-        <InputGroup>
+        <InputGroup maxWidth="xs">
           <InputLeftAddon>Type</InputLeftAddon>
           <Input
             type="string"
@@ -83,10 +50,24 @@ const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
             onChange={(event) => onChange("type", event.target.value)}
           />
         </InputGroup>
+        <Spacer />
+        <ConnectButton />
       </Stack>
 
       <Box mt={4}>
-        <PokedexTable pokedex={pokedex} />
+        <PokedexTable
+          pokedex={pokedex?.filter(
+            ({ name, types }) =>
+              (!query.name ||
+                name
+                  .toLowerCase()
+                  .includes(query.name.toString().toLowerCase())) &&
+              (!query.type ||
+                types
+                  .toLowerCase()
+                  .includes(query.type.toString().toLowerCase()))
+          )}
+        />
       </Box>
     </Box>
   );

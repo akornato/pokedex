@@ -116,7 +116,6 @@ contract Marketplace {
     function getListing(address NFTAddress, uint256 tokenId)
         external
         view
-        isListed(NFTAddress, tokenId)
         returns (Listing memory)
     {
         return listings[NFTAddress][tokenId];

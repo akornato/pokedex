@@ -3,12 +3,17 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "../shared/theme";
 import { WagmiConfig, createClient, chain, configureChains } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
+import { alchemyProvider } from "wagmi/providers/alchemy";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+import { NetworkGuard } from "web/components/NetworkGuard";
 import type { AppProps } from "next/app";
 
 const { chains, provider } = configureChains(
   [chain.polygonMumbai, chain.hardhat],
-  [publicProvider()]
+  [
+    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY as string }),
+    publicProvider(),
+  ]
 );
 
 const client = createClient({
@@ -25,7 +30,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <ChakraProvider theme={theme}>
         <WagmiConfig client={client}>
-          <Component {...pageProps} />
+          <NetworkGuard>
+            <Component {...pageProps} />
+          </NetworkGuard>
         </WagmiConfig>
       </ChakraProvider>
     </>
