@@ -7,6 +7,7 @@ import {
   InputGroup,
   InputLeftAddon,
   Spacer,
+  Spinner,
 } from "@chakra-ui/react";
 import { omitBy, debounce } from "lodash";
 import { PokedexTable } from "web/components/PokedexTable";
@@ -32,6 +33,12 @@ const Home: NextPage = () => {
 
   return (
     <Box p={4}>
+      {!pokedex && (
+        <Spinner
+          size="xl"
+          style={{ position: "fixed", bottom: "1rem", left: "1rem" }}
+        />
+      )}
       <Stack direction="row">
         <InputGroup maxWidth="xs">
           <InputLeftAddon>Name</InputLeftAddon>

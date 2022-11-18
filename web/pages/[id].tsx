@@ -12,6 +12,8 @@ import {
   Button,
   Stack,
   Spacer,
+  Spinner,
+  Skeleton,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
@@ -32,7 +34,6 @@ const PokemonDetails: NextPage = () => {
   const { query, push } = useRouter();
   const tokenId = ethers.BigNumber.from(query?.id?.toString() || 0);
   const { address: connectedAddress } = useAccount();
-  const [buttonLoading, setButtonLoading] = useState(false);
   const { pokemon, owner } = usePokemon(tokenId);
   const { name, description, image, attributes } = pokemon || {};
   const {
@@ -53,10 +54,15 @@ const PokemonDetails: NextPage = () => {
       variants={{ hidden: { opacity: 0 }, enter: { opacity: 1 } }}
     >
       <Stack direction="row">
+        {!pokemon && (
+          <Spinner
+            size="xl"
+            style={{ position: "fixed", bottom: "1rem", left: "1rem" }}
+          />
+        )}
         <Button
           leftIcon={<ArrowBackIcon />}
           onClick={() => {
-            setButtonLoading(true);
             push({
               pathname: "/",
               query: {
@@ -65,7 +71,6 @@ const PokemonDetails: NextPage = () => {
               },
             });
           }}
-          isLoading={buttonLoading}
         >
           Pokedex
         </Button>
@@ -73,7 +78,7 @@ const PokemonDetails: NextPage = () => {
         <ConnectButton />
       </Stack>
       <Box mt={4}>
-        {image && (
+        {image ? (
           <Image
             width={400}
             height={400}
@@ -82,81 +87,87 @@ const PokemonDetails: NextPage = () => {
             placeholder="blur"
             blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(400, 400)}`}
           />
+        ) : (
+          <Skeleton width={400} height={400} />
         )}
       </Box>
       <Text fontSize="5xl">{name}</Text>
 
-      <StatGroup mt={4}>
-        {isListingActive && listing && (
-          <>
+      {pokemon && (
+        <>
+          <StatGroup mt={4}>
+            {isListingActive && listing && (
+              <>
+                <Stat>
+                  <StatLabel>Listed price</StatLabel>
+                  <StatNumber>
+                    {ethers.utils.formatEther(listing.price).toString()} MATIC
+                    {connectedAddress && connectedAddress !== owner && (
+                      <Button
+                        ml={4}
+                        mb={2}
+                        position="absolute"
+                        onClick={() => buy?.()}
+                      >
+                        Buy item
+                      </Button>
+                    )}
+                    {connectedAddress && connectedAddress === owner && (
+                      <Button
+                        ml={4}
+                        mb={2}
+                        position="absolute"
+                        onClick={() => cancelListing?.()}
+                      >
+                        Cancel listing
+                      </Button>
+                    )}
+                  </StatNumber>
+                </Stat>
+                <Stat>
+                  <StatLabel>Seller</StatLabel>
+                  <StatNumber>
+                    {listing.seller.substring(0, 5)}...
+                    {listing.seller.substring(listing.seller.length - 4)}
+                  </StatNumber>
+                </Stat>
+              </>
+            )}
             <Stat>
-              <StatLabel>Listed price</StatLabel>
+              <StatLabel>Owner</StatLabel>
               <StatNumber>
-                {ethers.utils.formatEther(listing.price).toString()} MATIC
-                {connectedAddress && connectedAddress !== owner && (
-                  <Button
-                    ml={4}
-                    mb={2}
-                    position="absolute"
-                    onClick={() => buy?.()}
-                  >
-                    Buy item
-                  </Button>
-                )}
-                {connectedAddress && connectedAddress === owner && (
-                  <Button
-                    ml={4}
-                    mb={2}
-                    position="absolute"
-                    onClick={() => cancelListing?.()}
-                  >
-                    Cancel listing
-                  </Button>
-                )}
+                {owner?.substring(0, 5)}...
+                {owner?.substring(owner.length - 4)}
               </StatNumber>
             </Stat>
-            <Stat>
-              <StatLabel>Seller</StatLabel>
-              <StatNumber>
-                {listing.seller.substring(0, 5)}...
-                {listing.seller.substring(listing.seller.length - 4)}
-              </StatNumber>
-            </Stat>
-          </>
-        )}
-        <Stat>
-          <StatLabel>Owner</StatLabel>
-          <StatNumber>
-            {owner?.substring(0, 5)}...
-            {owner?.substring(owner.length - 4)}
-          </StatNumber>
-        </Stat>
-      </StatGroup>
+          </StatGroup>
 
-      {!isListingActive &&
-        connectedAddress &&
-        owner &&
-        connectedAddress === owner &&
-        (!isApproved ? (
-          <Button mt={2} onClick={async () => approve?.()}>
-            Approve
-          </Button>
-        ) : (
-          <Button mt={2} onClick={async () => listItem?.()}>
-            List item
-          </Button>
-        ))}
-      <Text mt={4} fontSize="lg">
-        {description}
-      </Text>
-      <StatGroup mt={8}>
-        {attributes?.map(({ trait_type, value }) => (
-          <Stat key={trait_type}>
-            <StatLabel>{trait_type}</StatLabel>
-            <StatNumber>{value}</StatNumber>
-          </Stat>
-        ))}
-      </StatGroup>
+          {!isListingActive &&
+            connectedAddress &&
+            owner &&
+            connectedAddress === owner &&
+            (!isApproved ? (
+              <Button mt={2} onClick={async () => approve?.()}>
+                Approve
+              </Button>
+            ) : (
+              <Button mt={2} onClick={async () => listItem?.()}>
+                List item
+              </Button>
+            ))}
+          <Text mt={4} fontSize="lg">
+            {description}
+          </Text>
+          <StatGroup mt={8}>
+            {attributes?.map(({ trait_type, value }) => (
+              <Stat key={trait_type}>
+                <StatLabel>{trait_type}</StatLabel>
+                <StatNumber>{value}</StatNumber>
+              </Stat>
+            ))}
+          </StatGroup>
+        </>
+      )}
     </MotionBox>
   );
 };
