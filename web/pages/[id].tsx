@@ -11,30 +11,67 @@ import {
   Button,
   Stack,
   Spacer,
-  Spinner,
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
-import { useAccount } from "wagmi";
+import { useAccount, chain as chains } from "wagmi";
 import { motion } from "framer-motion";
 import { base64Shimmer } from "web/shared/shimmer";
 import { useMarketplace } from "web/hooks/useMarketplace";
-import { usePokemon } from "web/hooks/usePokemon";
 import { ConnectButton } from "web/components/ConnectButton";
-import type { NextPage } from "next";
+import { getAddresses } from "web/shared/addresses";
+import { abi as pokemonAbi } from "sol/artifacts/contracts/Pokemon.sol/Pokemon.json";
+import type { NextPage, GetServerSideProps } from "next";
+import type { Pokemon as PokemonContract } from "sol/typechain-types";
+import type { Pokemon } from "web/types/Pokemon";
 
 const MotionBox = motion(
   forwardRef((props, ref) => <Box {...props} ref={ref} />)
 );
 MotionBox.displayName = "MotionBox";
 
-const PokemonDetails: NextPage = () => {
+const pokemonCache: { [chainIdTokenId: string]: Pokemon } = {};
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const chainId =
+    parseInt(query?.chainId?.toString() || "0") || chains.polygonMumbai.id;
+  const pokemonId = parseInt(query?.id?.toString() || "0");
+  const cacheKey = `${chainId}:${pokemonId}`;
+  if (!pokemonCache[cacheKey]) {
+    const { pokemonAddress } = getAddresses(chainId);
+    const pokemonContract = new ethers.Contract(
+      pokemonAddress,
+      pokemonAbi,
+      new ethers.providers.JsonRpcProvider(
+        chainId === chains.hardhat.id
+          ? "http://127.0.0.1:8545"
+          : `https://polygon-mumbai.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`
+      )
+    ) as PokemonContract;
+    pokemonCache[cacheKey] = await pokemonContract
+      .tokenURI(parseInt(query?.id?.toString() || "0"))
+      .then((cid) =>
+        fetch(`https://pokemon-nft.infura-ipfs.io/ipfs/${cid}`).then((res) =>
+          res.json()
+        )
+      );
+  }
+  return {
+    props: {
+      pokemon: pokemonCache[cacheKey],
+    },
+  };
+};
+
+const PokemonDetails: NextPage<{
+  pokemon: Pokemon;
+}> = ({ pokemon }) => {
   const { query, push } = useRouter();
   const tokenId = ethers.BigNumber.from(query?.id?.toString() || 0);
   const { address: connectedAddress } = useAccount();
-  const { pokemon, owner } = usePokemon(tokenId);
   const { name, description, image, attributes } = pokemon || {};
   const {
+    owner,
     isListingActive,
     listing,
     buy,
@@ -42,7 +79,7 @@ const PokemonDetails: NextPage = () => {
     approve,
     isApproved,
     listItem,
-  } = useMarketplace(tokenId, owner);
+  } = useMarketplace(tokenId);
 
   return (
     <MotionBox
@@ -52,12 +89,6 @@ const PokemonDetails: NextPage = () => {
       variants={{ hidden: { opacity: 0 }, enter: { opacity: 1 } }}
     >
       <Stack direction="row">
-        {!pokemon && (
-          <Spinner
-            size="xl"
-            style={{ position: "fixed", bottom: "1rem", left: "1rem" }}
-          />
-        )}
         <Button
           leftIcon={<ArrowBackIcon />}
           onClick={() => {
@@ -76,61 +107,32 @@ const PokemonDetails: NextPage = () => {
         <ConnectButton />
       </Stack>
       <Box mt={4}>
-        {image ? (
-          <Image
-            width={400}
-            height={400}
-            src={`https://pokemon-nft.infura-ipfs.io/ipfs/${image}`}
-            alt="Pokemon image"
-            placeholder="blur"
-            blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(400, 400)}`}
-          />
-        ) : (
-          <Box width={400} height={400} />
-        )}
+        <Image
+          width={400}
+          height={400}
+          src={`https://pokemon-nft.infura-ipfs.io/ipfs/${image}`}
+          alt="Pokemon image"
+          placeholder="blur"
+          blurDataURL={`data:image/svg+xml;base64,${base64Shimmer(400, 400)}`}
+        />
       </Box>
       <Text fontSize="5xl">{name}</Text>
 
-      {pokemon && (
-        <>
-          <StatGroup mt={4}>
-            {isListingActive && listing && (
-              <>
-                <Stat>
-                  <StatLabel>Listed price</StatLabel>
-                  <StatNumber>
-                    {ethers.utils.formatEther(listing.price).toString()} MATIC
-                    {connectedAddress && connectedAddress !== owner && (
-                      <Button
-                        ml={4}
-                        mb={2}
-                        position="absolute"
-                        onClick={() => buy?.()}
-                      >
-                        Buy item
-                      </Button>
-                    )}
-                    {connectedAddress && connectedAddress === owner && (
-                      <Button
-                        ml={4}
-                        mb={2}
-                        position="absolute"
-                        onClick={() => cancelListing?.()}
-                      >
-                        Cancel listing
-                      </Button>
-                    )}
-                  </StatNumber>
-                </Stat>
-                <Stat>
-                  <StatLabel>Seller</StatLabel>
-                  <StatNumber>
-                    {listing.seller.substring(0, 5)}...
-                    {listing.seller.substring(listing.seller.length - 4)}
-                  </StatNumber>
-                </Stat>
-              </>
-            )}
+      <Text mt={4} fontSize="lg">
+        {description}
+      </Text>
+      <StatGroup mt={8}>
+        {attributes?.map(({ trait_type, value }) => (
+          <Stat key={trait_type}>
+            <StatLabel>{trait_type}</StatLabel>
+            <StatNumber>{value}</StatNumber>
+          </Stat>
+        ))}
+      </StatGroup>
+
+      <StatGroup mt={4}>
+        {isListingActive && listing && (
+          <>
             <Stat>
               <StatLabel>Owner</StatLabel>
               <StatNumber>
@@ -138,34 +140,56 @@ const PokemonDetails: NextPage = () => {
                 {owner?.substring(owner.length - 4)}
               </StatNumber>
             </Stat>
-          </StatGroup>
+            <Stat>
+              <StatLabel>Listed price</StatLabel>
+              <StatNumber>
+                {ethers.utils.formatEther(listing.price).toString()} MATIC
+                {connectedAddress && connectedAddress !== owner && (
+                  <Button
+                    ml={4}
+                    mb={2}
+                    position="absolute"
+                    onClick={() => buy?.()}
+                  >
+                    Buy item
+                  </Button>
+                )}
+                {connectedAddress && connectedAddress === owner && (
+                  <Button
+                    ml={4}
+                    mb={2}
+                    position="absolute"
+                    onClick={() => cancelListing?.()}
+                  >
+                    Cancel listing
+                  </Button>
+                )}
+              </StatNumber>
+            </Stat>
+            <Stat>
+              <StatLabel>Seller</StatLabel>
+              <StatNumber>
+                {listing.seller.substring(0, 5)}...
+                {listing.seller.substring(listing.seller.length - 4)}
+              </StatNumber>
+            </Stat>
+          </>
+        )}
+      </StatGroup>
 
-          {!isListingActive &&
-            connectedAddress &&
-            owner &&
-            connectedAddress === owner &&
-            (!isApproved ? (
-              <Button mt={2} onClick={async () => approve?.()}>
-                Approve
-              </Button>
-            ) : (
-              <Button mt={2} onClick={async () => listItem?.()}>
-                List item
-              </Button>
-            ))}
-          <Text mt={4} fontSize="lg">
-            {description}
-          </Text>
-          <StatGroup mt={8}>
-            {attributes?.map(({ trait_type, value }) => (
-              <Stat key={trait_type}>
-                <StatLabel>{trait_type}</StatLabel>
-                <StatNumber>{value}</StatNumber>
-              </Stat>
-            ))}
-          </StatGroup>
-        </>
-      )}
+      {!isListingActive &&
+        connectedAddress &&
+        owner &&
+        connectedAddress === owner &&
+        (!isApproved ? (
+          <Button mt={2} onClick={async () => approve?.()}>
+            Approve
+          </Button>
+        ) : (
+          <Button mt={2} onClick={async () => listItem?.()}>
+            List item
+          </Button>
+        ))}
     </MotionBox>
   );
 };

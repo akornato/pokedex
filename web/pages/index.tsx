@@ -17,14 +17,15 @@ import { getAddresses } from "web/shared/addresses";
 import { abi as pokemonAbi } from "sol/artifacts/contracts/Pokemon.sol/Pokemon.json";
 import type { NextPage, GetServerSideProps } from "next";
 import type { Pokedex } from "web/types/Pokemon";
+import type { Pokemon } from "sol/typechain-types";
 
-let pokedexCache: { [network: string]: Pokedex } = {};
+let pokedexCache: { [chainId: string]: Pokedex } = {};
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const chainId =
     parseInt(query?.chainId?.toString() || "0") || chains.polygonMumbai.id;
-  const { pokemonAddress } = getAddresses(chainId);
   if (!pokedexCache[chainId]) {
+    const { pokemonAddress } = getAddresses(chainId);
     const pokemonContract = new ethers.Contract(
       pokemonAddress,
       pokemonAbi,
@@ -33,7 +34,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
           ? "http://127.0.0.1:8545"
           : `https://polygon-mumbai.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`
       )
-    );
+    ) as Pokemon;
     pokedexCache[chainId] = await pokemonContract
       .queryFilter(pokemonContract.filters.Minted())
       .then((mintedEvents) =>

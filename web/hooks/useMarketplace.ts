@@ -10,9 +10,7 @@ import { getAddresses } from "web/shared/addresses";
 import { abi as abiPokemon } from "web/shared/Pokemon.abi.const";
 import { abi as abiMarketplace } from "web/shared/Marketplace.abi.const";
 
-type Address = `0x${string}`;
-
-export const useMarketplace = (tokenId: ethers.BigNumber, owner?: Address) => {
+export const useMarketplace = (tokenId: ethers.BigNumber) => {
   const { chain } = useNetwork();
   const { address: connectedAddress } = useAccount();
   const { marketplaceAddress, pokemonAddress } = getAddresses(chain?.id);
@@ -43,6 +41,13 @@ export const useMarketplace = (tokenId: ethers.BigNumber, owner?: Address) => {
     enabled: buyItemEnabled,
   });
   const { write: buy } = useContractWrite(buyItemConfig);
+
+  const { data: owner } = useContractRead({
+    address: pokemonAddress,
+    abi: abiPokemon,
+    functionName: "ownerOf",
+    args: [tokenId],
+  });
 
   const cancelListingEnabled =
     isListingActive && connectedAddress && connectedAddress === owner;
@@ -87,6 +92,7 @@ export const useMarketplace = (tokenId: ethers.BigNumber, owner?: Address) => {
   const { write: listItem } = useContractWrite(listItemConfig);
 
   return {
+    owner,
     isListingActive,
     listing:
       listing && listing.seller !== ethers.constants.AddressZero
