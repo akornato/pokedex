@@ -24,7 +24,10 @@ MotionTr.displayName = "MotionTr";
 
 const itemsPerPage = 10;
 
-export const PokedexTable: React.FC<{ pokedex?: Pokedex }> = ({ pokedex }) => {
+export const PokedexTable: React.FC<{
+  pokedex?: Pokedex;
+  setShowProgress: (arg: boolean) => void;
+}> = ({ pokedex, setShowProgress }) => {
   const { query, push } = useRouter();
   const [page, setPage] = useState({ count: 1, scrollY: 0 });
   const filteredPokedex = pokedex?.filter(
@@ -60,15 +63,16 @@ export const PokedexTable: React.FC<{ pokedex?: Pokedex }> = ({ pokedex }) => {
                   filter: "brightness(1.5)",
                 }}
                 style={{ cursor: "pointer" }}
-                onClick={() =>
+                onClick={() => {
+                  setShowProgress(true);
                   push({
                     pathname: `/${tokenId}`,
                     query: {
                       ...(query.name ? { name: query.name } : {}),
                       ...(query.type ? { type: query.type } : {}),
                     },
-                  })
-                }
+                  });
+                }}
               >
                 <Td>{tokenId}</Td>
                 <Td>

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
 import {
@@ -8,6 +8,7 @@ import {
   InputGroup,
   InputLeftAddon,
   Spacer,
+  Progress,
 } from "@chakra-ui/react";
 import { chain as chains } from "wagmi";
 import { omitBy, debounce } from "lodash";
@@ -67,6 +68,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 
 const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
   const { query, push } = useRouter();
+  const [showProgress, setShowProgress] = useState(false);
 
   const onChange = useMemo(
     () =>
@@ -81,45 +83,45 @@ const Home: NextPage<{ pokedex: Pokedex }> = ({ pokedex }) => {
   );
 
   return (
-    <Box p={4}>
-      <Stack direction="row">
-        <InputGroup maxWidth="xs">
-          <InputLeftAddon>Name</InputLeftAddon>
-          <Input
-            type="string"
-            defaultValue={query.name}
-            onChange={(event) => onChange("name", event.target.value)}
-          />
-        </InputGroup>
-
-        <InputGroup maxWidth="xs">
-          <InputLeftAddon>Type</InputLeftAddon>
-          <Input
-            type="string"
-            defaultValue={query.type}
-            onChange={(event) => onChange("type", event.target.value)}
-          />
-        </InputGroup>
-        <Spacer />
-        <ConnectButton />
-      </Stack>
-
-      <Box mt={4}>
-        <PokedexTable
-          pokedex={pokedex?.filter(
-            ({ name, types }) =>
-              (!query.name ||
-                name
-                  .toLowerCase()
-                  .includes(query.name.toString().toLowerCase())) &&
-              (!query.type ||
-                types
-                  .toLowerCase()
-                  .includes(query.type.toString().toLowerCase()))
-          )}
+    <>
+      {showProgress && (
+        <Progress
+          position="fixed"
+          left={0}
+          top={0}
+          right={0}
+          size="sm"
+          isIndeterminate
         />
+      )}
+      <Box p={4}>
+        <Stack direction="row">
+          <InputGroup maxWidth="xs">
+            <InputLeftAddon>Name</InputLeftAddon>
+            <Input
+              type="string"
+              defaultValue={query.name}
+              onChange={(event) => onChange("name", event.target.value)}
+            />
+          </InputGroup>
+
+          <InputGroup maxWidth="xs">
+            <InputLeftAddon>Type</InputLeftAddon>
+            <Input
+              type="string"
+              defaultValue={query.type}
+              onChange={(event) => onChange("type", event.target.value)}
+            />
+          </InputGroup>
+          <Spacer />
+          <ConnectButton />
+        </Stack>
+
+        <Box mt={4}>
+          <PokedexTable pokedex={pokedex} setShowProgress={setShowProgress} />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 
