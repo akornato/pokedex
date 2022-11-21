@@ -9,7 +9,7 @@ export const NetworkGuard: React.FC<{ children: React.ReactNode }> = ({
   const { address: connectedAddress } = useAccount();
   const isNetworkAllowed = [
     chains.polygonMumbai.id,
-    chains.hardhat.id,
+    process.env.NODE_ENV === "development" ? chains.hardhat.id : -1,
   ].includes(chain?.id || 0);
 
   if (connectedAddress && !isNetworkAllowed) {
@@ -17,7 +17,7 @@ export const NetworkGuard: React.FC<{ children: React.ReactNode }> = ({
       <Alert status="error">
         <AlertIcon />
         <AlertDescription>
-          Switch to either Polygon Mumbai or Hardhat network in Metamask
+          Switch to Polygon Mumbai in Metamask
         </AlertDescription>
       </Alert>
     );

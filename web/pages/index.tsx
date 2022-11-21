@@ -31,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       pokemonAddress,
       pokemonAbi,
       new ethers.providers.JsonRpcProvider(
-        chainId === chains.hardhat.id
+        chainId === chains.hardhat.id && process.env.NODE_ENV === 'development'
           ? "http://127.0.0.1:8545"
           : `https://polygon-mumbai.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`
       )
