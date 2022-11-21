@@ -22,7 +22,6 @@ export const useMarketplace = (tokenId: ethers.BigNumber) => {
     watch: true,
     cacheTime: 3_000,
   });
-
   const isListingActive =
     listing &&
     listing.seller &&
@@ -47,6 +46,8 @@ export const useMarketplace = (tokenId: ethers.BigNumber) => {
     abi: abiPokemon,
     functionName: "ownerOf",
     args: [tokenId],
+    watch: true,
+    cacheTime: 3_000,
   });
 
   const cancelListingEnabled =
@@ -69,42 +70,47 @@ export const useMarketplace = (tokenId: ethers.BigNumber) => {
     cacheTime: 3_000,
   });
 
-  const isApproveListEnabled =
-    !isListingActive && connectedAddress && owner && connectedAddress === owner;
-  const isApproved = approved === marketplaceAddress;
-
+  const isApproveEnabled =
+    !isListingActive &&
+    connectedAddress &&
+    owner &&
+    connectedAddress === owner &&
+    approved !== marketplaceAddress;
   const { config } = usePrepareContractWrite({
     address: pokemonAddress,
     abi: abiPokemon,
     functionName: "approve",
     args: [marketplaceAddress, tokenId],
-    enabled: isApproveListEnabled && !isApproved,
+    enabled: isApproveEnabled,
   });
   const { write: approve } = useContractWrite(config);
 
+  const isListItemEnabled =
+    !isListingActive &&
+    connectedAddress &&
+    owner &&
+    connectedAddress === owner &&
+    approved === marketplaceAddress;
   const { config: listItemConfig } = usePrepareContractWrite({
     address: marketplaceAddress,
     abi: abiMarketplace,
     functionName: "listItem",
     args: [pokemonAddress, tokenId, ethers.utils.parseEther("0.001")],
-    enabled: isApproveListEnabled && isApproved,
+    enabled: isListItemEnabled,
   });
   const { write: listItem } = useContractWrite(listItemConfig);
 
   return {
     owner,
-    isListingActive,
-    listing:
-      listing && listing.seller !== ethers.constants.AddressZero
-        ? {
-            price: listing.price,
-            seller: listing.seller,
-          }
-        : undefined,
-    buy,
-    cancelListing,
-    approve,
-    isApproved,
-    listItem,
+    listing: isListingActive
+      ? {
+          price: listing.price,
+          seller: listing.seller,
+        }
+      : undefined,
+    buy: buyItemEnabled ? buy : undefined,
+    cancelListing: cancelListingEnabled ? cancelListing : undefined,
+    approve: isApproveEnabled ? approve : undefined,
+    listItem: isListItemEnabled ? listItem : undefined,
   };
 };

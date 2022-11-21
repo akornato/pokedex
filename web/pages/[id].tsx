@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
-import { useAccount, chain as chains } from "wagmi";
+import { chain as chains } from "wagmi";
 import { motion } from "framer-motion";
 import { base64Shimmer } from "web/shared/shimmer";
 import { useMarketplace } from "web/hooks/useMarketplace";
@@ -71,18 +71,9 @@ const PokemonDetails: NextPage<{
   const { query, push } = useRouter();
   const [showProgress, setShowProgress] = useState(false);
   const tokenId = ethers.BigNumber.from(query?.id?.toString() || 0);
-  const { address: connectedAddress } = useAccount();
   const { name, description, image, attributes } = pokemon || {};
-  const {
-    owner,
-    isListingActive,
-    listing,
-    buy,
-    cancelListing,
-    approve,
-    isApproved,
-    listItem,
-  } = useMarketplace(tokenId);
+  const { owner, listing, buy, cancelListing, approve, listItem } =
+    useMarketplace(tokenId);
 
   return (
     <>
@@ -146,7 +137,7 @@ const PokemonDetails: NextPage<{
         </StatGroup>
 
         <StatGroup mt={4}>
-          {isListingActive && listing && (
+          {listing && (
             <>
               <Stat>
                 <StatLabel>Owner</StatLabel>
@@ -159,7 +150,7 @@ const PokemonDetails: NextPage<{
                 <StatLabel>Listed price</StatLabel>
                 <StatNumber>
                   {ethers.utils.formatEther(listing.price).toString()} MATIC
-                  {connectedAddress && connectedAddress !== owner && (
+                  {buy && (
                     <Button
                       ml={4}
                       mb={2}
@@ -169,7 +160,7 @@ const PokemonDetails: NextPage<{
                       Buy item
                     </Button>
                   )}
-                  {connectedAddress && connectedAddress === owner && (
+                  {cancelListing && (
                     <Button
                       ml={4}
                       mb={2}
@@ -191,20 +182,16 @@ const PokemonDetails: NextPage<{
             </>
           )}
         </StatGroup>
-
-        {!isListingActive &&
-          connectedAddress &&
-          owner &&
-          connectedAddress === owner &&
-          (!isApproved ? (
-            <Button mt={2} onClick={async () => approve?.()}>
-              Approve
-            </Button>
-          ) : (
-            <Button mt={2} onClick={async () => listItem?.()}>
-              List item
-            </Button>
-          ))}
+        {approve && (
+          <Button mt={2} onClick={async () => approve?.()}>
+            Approve
+          </Button>
+        )}
+        {listItem && (
+          <Button mt={2} onClick={async () => listItem?.()}>
+            List item
+          </Button>
+        )}
       </MotionBox>
     </>
   );
