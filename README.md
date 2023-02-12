@@ -23,4 +23,4 @@ The state for name & type filters at the root page is kept in url query params s
 - `yarn scripts:mint-feed` uploads images and metadata to IPFS, and turns `pokedex.json` into a `mint-feed.json` with the fields ready to be consumed by `yarn sol:deploy`
 - `yarn sol:node` starts Hardhat Network
 - `yarn sol:deploy` deploys Pokemon and Marketplace contracts, mints all the Pokemon NFTs from `mint-feed.json`, and lists them on the marketplace
-- `yarn web:dev` starts the web app at [http://localhost:3000](http://localhost:3000) and API routes at [http://localhost:3000/api/list](http://localhost:3000/api/list) and [http://localhost:3000/api/get/1](http://localhost:3000/api/get/1).
+- `yarn web:dev` starts the web app at [http://localhost:3000](http://localhost:3000)
